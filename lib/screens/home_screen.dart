@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile_vet_app/screens/home_content.dart';
 import 'profile_screen.dart';
 import 'citas_screen.dart';
 import 'historia_screen.dart';
@@ -16,7 +17,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = const [
-    ProfileScreen(),
+    //ProfileScreen(),
+    HomeContent(),
     CitasScreen(),
     HistoriaScreen(),
     LugaresScreen(),

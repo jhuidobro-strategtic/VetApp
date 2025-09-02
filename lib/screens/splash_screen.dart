@@ -46,7 +46,7 @@ class _SplashScreenState extends State<SplashScreen>
           color: Colors.white, // fondo blanco detrás de la imagen
           child: Center(
             child: Image.asset(
-              "assets/images/logo.png",
+              "assets/images/logo_vetapp_oficial.png",
               fit: BoxFit.contain, // mantiene proporciones
               width:
                   MediaQuery.of(context).size.width *

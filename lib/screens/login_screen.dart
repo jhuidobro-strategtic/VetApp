@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,14 +14,54 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _userController = TextEditingController();
   final TextEditingController _passController = TextEditingController();
   bool _obscurePass = true;
+  bool _isLoading = false;
 
-  void _login() {
-    if (_userController.text == "admin" && _passController.text == "admin") {
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
+  //consumo de api
+  Future<void> _login() async {
+    final email = _userController.text.trim();
+    final password = _passController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Usuario o contraseña incorrectos")),
+        const SnackBar(content: Text("Por favor ingresa email y contraseña")),
       );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final url = Uri.parse(
+        "https://apivet.strategtic.com/api/v1/login",
+      ); // 👈 Cambia {{prod}}
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"email": email, "password": password}),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && data["success"] == true) {
+        final userName = data["data"]["user"]["name"];
+
+        // 👉 Navegar al HomeContent con el nombre
+        Navigator.pushReplacementNamed(context, '/home', arguments: userName);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data["message"] ?? "Error en login")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error de conexión: $e")));
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -35,13 +77,14 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 // 📌 Imagen arriba
                 Image.asset(
-                  "assets/images/logovetapp.png",
-                  width: 300,
+                  "assets/images/logo_vetapp_oficial.png",
+                  width: 450,
                   height: 150,
-                  fit: BoxFit.contain,
+                  fit: BoxFit.cover,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 5),
 
+                /*
                 // 📌 Bienvenida
                 Text(
                   "Welcome to",
@@ -59,6 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 30),
+                */
 
                 // 📌 Botón Google
                 // 📌 Botón Google con sombra
@@ -142,6 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       labelStyle: GoogleFonts.poppins(
                         color: Colors.black54,
                         fontWeight: FontWeight.w500,
+                        fontSize: 13,
                       ),
                       hintStyle: GoogleFonts.poppins(
                         color: Colors.black38,
@@ -155,8 +200,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // 📌 Campo Password
                 // 📌 Campo Password
                 Container(
                   decoration: BoxDecoration(
@@ -173,6 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       labelStyle: GoogleFonts.poppins(
                         color: Colors.black54,
                         fontWeight: FontWeight.w500,
+                        fontSize: 13,
                       ),
                       hintStyle: GoogleFonts.poppins(
                         color: Colors.black38,
@@ -227,7 +271,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _login,
+                    onPressed: _isLoading ? null : _login,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepPurpleAccent,
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -235,10 +279,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text(
-                      "Login",
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                            "Login",
+                            style: TextStyle(fontSize: 16, color: Colors.white),
+                          ),
                   ),
                 ),
 

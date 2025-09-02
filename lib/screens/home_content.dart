@@ -223,7 +223,10 @@ class HomeContent extends StatelessWidget {
                   ),
                   elevation: 3,
                   child: ListTile(
-                    leading: const Icon(Icons.settings, color: Colors.teal),
+                    leading: const Icon(
+                      Icons.settings,
+                      color: Colors.deepPurpleAccent,
+                    ),
                     title: const Text("Configurar zona de domicilios"),
                     trailing: const Icon(Icons.chevron_right),
                   ),

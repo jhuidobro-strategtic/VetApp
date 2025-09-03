@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile_vet_app/screens/app_colors.dart';
 import 'package:mobile_vet_app/screens/home_content.dart';
 import 'profile_screen.dart';
 import 'citas/citas_screen.dart';
@@ -30,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        selectedItemColor: Colors.deepPurpleAccent,
+        selectedItemColor: AppColors.primary,
         unselectedItemColor: Colors.grey,
         backgroundColor: Colors.white,
         type: BottomNavigationBarType.fixed,
@@ -53,8 +54,8 @@ class _HomeScreenState extends State<HomeScreen> {
             label: "Home",
           ),
           BottomNavigationBarItem(
-            icon: _buildBottomNavItem(Icons.account_balance_wallet_outlined, 1),
-            label: "Wallet",
+            icon: _buildBottomNavItem(Icons.medical_services, 1),
+            label: "Cita Medica",
           ),
           BottomNavigationBarItem(
             icon: _buildBottomNavItem(Icons.notifications_outlined, 2),
@@ -89,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
               width:
                   MediaQuery.of(context).size.width /
                   8, // Ancho igual dividido entre 4 ítems
-              color: Colors.deepPurpleAccent, // Color de la rayita
+              color: AppColors.primary, // Color de la rayita
             ),
           ),
       ],

@@ -1,7 +1,7 @@
 class AppointmentModel {
   String? petName;
   String? petType;
-  int? petAge;
+  String? petAge;
   String? gender;
 
   List<String> symptoms = [];

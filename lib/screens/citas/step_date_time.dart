@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile_vet_app/screens/app_colors.dart';
 import 'appointment_model.dart';
 
 class StepDateTime extends StatefulWidget {
@@ -38,13 +40,16 @@ class _StepDateTimeState extends State<StepDateTime> {
     return Column(
       children: [
         // 👉 parte superior fija
-        const Padding(
+        Padding(
           padding: EdgeInsets.all(16),
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
               "Select Date & Time",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: GoogleFonts.poppins(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -68,9 +73,12 @@ class _StepDateTimeState extends State<StepDateTime> {
                   },
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   "Available Time Slots",
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 GridView.count(
@@ -86,14 +94,14 @@ class _StepDateTimeState extends State<StepDateTime> {
                     return OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         backgroundColor: isSelected
-                            ? Colors.deepPurpleAccent
+                            ? AppColors.primary
                             : Colors.white,
                         foregroundColor: isSelected
                             ? Colors.white
                             : Colors.black,
                         side: BorderSide(
                           color: isSelected
-                              ? Colors.deepPurpleAccent
+                              ? AppColors.primary
                               : Colors.grey.shade300,
                         ),
                       ),
@@ -129,7 +137,14 @@ class _StepDateTimeState extends State<StepDateTime> {
                       borderRadius: BorderRadius.circular(12), // <- radius aquí
                     ),
                   ),
-                  child: const Text("< BACK"),
+                  child: Text(
+                    "< BACK",
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.primary,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -137,7 +152,7 @@ class _StepDateTimeState extends State<StepDateTime> {
                 child: ElevatedButton(
                   onPressed: selectedTime != null ? widget.onNext : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurpleAccent,
+                    backgroundColor: AppColors.primary,
                     minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(
@@ -146,9 +161,13 @@ class _StepDateTimeState extends State<StepDateTime> {
                     ),
                     elevation: 4,
                   ),
-                  child: const Text(
+                  child: Text(
                     "CONTINUAR >",
-                    style: TextStyle(color: Colors.white),
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),

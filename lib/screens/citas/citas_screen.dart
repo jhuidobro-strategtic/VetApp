@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile_vet_app/screens/app_colors.dart';
 import 'appointment_model.dart';
 import 'step_pet.dart';
 import 'step_symptoms.dart';
@@ -74,16 +76,17 @@ class _CitasScreenState extends State<CitasScreen> {
             children: [
               CircleAvatar(
                 backgroundColor: isCompleted || isActive
-                    ? Colors.deepPurpleAccent
+                    ? AppColors.primary
                     : Colors.grey.shade300,
                 child: Icon(_getIcon(index), color: Colors.white),
               ),
               const SizedBox(height: 4),
               Text(
                 titles[index],
-                style: TextStyle(
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
                   fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                  color: isActive ? Colors.deepPurpleAccent : Colors.grey,
+                  color: isActive ? AppColors.primary : Colors.grey,
                 ),
               ),
             ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile_vet_app/screens/app_colors.dart';
 import 'package:mobile_vet_app/screens/pets_screen.dart';
 
 class HomeContent extends StatelessWidget {
@@ -67,7 +68,7 @@ class HomeContent extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 10),
 
               GestureDetector(
                 onTap: () {
@@ -108,7 +109,7 @@ class HomeContent extends StatelessWidget {
                   ),
                 ),
               ),
-
+              const SizedBox(height: 10),
               // Cards pequeños (en Row)
               Row(
                 children: [
@@ -225,7 +226,7 @@ class HomeContent extends StatelessWidget {
                   child: ListTile(
                     leading: const Icon(
                       Icons.settings,
-                      color: Colors.deepPurpleAccent,
+                      color: AppColors.primary,
                     ),
                     title: const Text("Configurar zona de domicilios"),
                     trailing: const Icon(Icons.chevron_right),

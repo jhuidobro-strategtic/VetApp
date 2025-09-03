@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile_vet_app/screens/app_colors.dart';
 import 'appointment_model.dart';
 
 class StepSymptoms extends StatefulWidget {
@@ -39,13 +41,16 @@ class _StepSymptomsState extends State<StepSymptoms> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.all(16),
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
               "Select Symptoms",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: GoogleFonts.poppins(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -70,8 +75,14 @@ class _StepSymptomsState extends State<StepSymptoms> {
                   ),
                   child: CheckboxListTile(
                     value: isSelected,
-                    title: Text(symptom),
-                    activeColor: Colors.deepPurpleAccent,
+                    title: Text(
+                      symptom,
+                      style: GoogleFonts.poppins(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    activeColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -88,21 +99,41 @@ class _StepSymptomsState extends State<StepSymptoms> {
                 );
               }),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 "Additional Notes",
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: GoogleFonts.poppins(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 16),
-              TextField(
-                controller: notesController,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  hintText: "Add any other symptoms or concerns...",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 5),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 6,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
-                onChanged: (val) => widget.model.additionalNotes = val,
+                child: TextField(
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  controller: notesController,
+                  maxLines: 4,
+                  decoration: InputDecoration(
+                    hintText: "Add any other symptoms or concerns...",
+                    border: InputBorder.none, // eliminamos el borde por defecto
+                    contentPadding: const EdgeInsets.all(16),
+                  ),
+                  onChanged: (val) => widget.model.additionalNotes = val,
+                ),
               ),
             ],
           ),
@@ -123,7 +154,14 @@ class _StepSymptomsState extends State<StepSymptoms> {
                       borderRadius: BorderRadius.circular(12), // <- radius aquí
                     ),
                   ),
-                  child: const Text("< BACK"),
+                  child: Text(
+                    "< BACK",
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.primary,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -135,7 +173,7 @@ class _StepSymptomsState extends State<StepSymptoms> {
                       ? widget.onNext
                       : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurpleAccent,
+                    backgroundColor: AppColors.primary,
                     minimumSize: const Size(double.infinity, 50),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(
@@ -144,9 +182,13 @@ class _StepSymptomsState extends State<StepSymptoms> {
                     ),
                     elevation: 4,
                   ),
-                  child: const Text(
+                  child: Text(
                     "CONTINUAR >",
-                    style: TextStyle(color: Colors.white),
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),

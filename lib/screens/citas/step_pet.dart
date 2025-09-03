@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:mobile_vet_app/screens/app_colors.dart';
 import 'appointment_model.dart';
 
 class StepPet extends StatefulWidget {
@@ -28,15 +30,29 @@ class _StepPetState extends State<StepPet> {
             ),
           ),
         ),
-        _buildPetCard("Max", "Golden Retriever", 4, "Male", "assets/dog.png"),
-        _buildPetCard("Luna", "Tabby Cat", 2, "Female", "assets/cat.png"),
+        _buildPetCard(
+          "Max",
+          "Golden Retriever",
+          "4 years old",
+          "Male",
+          Icons.male,
+          "assets/images/dog1.jpg",
+        ),
+        _buildPetCard(
+          "Luna",
+          "Tabby Cat",
+          "4 years old",
+          "Female",
+          Icons.female,
+          "assets/images/dog2.jpg",
+        ),
         const Spacer(),
         Padding(
           padding: const EdgeInsets.all(16),
           child: ElevatedButton(
             onPressed: selectedPet != null ? widget.onNext : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepPurpleAccent,
+              backgroundColor: AppColors.primary,
               minimumSize: const Size(double.infinity, 50),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(
@@ -45,9 +61,13 @@ class _StepPetState extends State<StepPet> {
               ),
               elevation: 4,
             ),
-            child: const Text(
+            child: Text(
               "CONTINUAR >",
-              style: TextStyle(color: Colors.white),
+              style: GoogleFonts.poppins(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: Colors.white,
+              ),
             ),
           ),
         ),
@@ -58,8 +78,9 @@ class _StepPetState extends State<StepPet> {
   Widget _buildPetCard(
     String name,
     String breed,
-    int age,
+    String age,
     String gender,
+    IconData genderIcon,
     String imagePath,
   ) {
     final isSelected = selectedPet == name;
@@ -77,9 +98,9 @@ class _StepPetState extends State<StepPet> {
       child: Card(
         shape: RoundedRectangleBorder(
           side: BorderSide(
-            color: isSelected ? Colors.deepPurpleAccent : Colors.grey.shade300,
+            color: isSelected ? AppColors.primary : Colors.grey.shade300,
           ),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
         ),
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: ListTile(
@@ -91,9 +112,28 @@ class _StepPetState extends State<StepPet> {
             name,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-          subtitle: Text("$breed • $age years old\n$gender"),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "${breed} • ${age}",
+                style: const TextStyle(color: Colors.black54),
+              ),
+              Row(
+                children: [
+                  Icon(
+                    genderIcon,
+                    color: gender == "Male" ? Colors.blue : Colors.pink,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(gender, style: const TextStyle(color: Colors.black54)),
+                ],
+              ),
+            ],
+          ),
           trailing: isSelected
-              ? const Icon(Icons.check_circle, color: Colors.deepPurpleAccent)
+              ? const Icon(Icons.check_circle, color: AppColors.primary)
               : null,
         ),
       ),

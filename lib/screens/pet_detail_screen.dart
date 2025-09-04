@@ -21,7 +21,7 @@ class PetDetailScreen extends StatelessWidget {
                   //bottomLeft: Radius.circular(20),
                   //bottomRight: Radius.circular(20),
                 ),
-                child: Image.asset(
+                child: Image.network(
                   pet["image"],
                   width: double.infinity,
                   height: 250,

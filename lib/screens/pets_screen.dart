@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_vet_app/models/pet.dart';
+import 'package:mobile_vet_app/screens/add_pet_screen.dart';
 import 'package:mobile_vet_app/screens/app_colors.dart';
 import 'package:mobile_vet_app/screens/pet_detail_screen.dart';
 
@@ -57,7 +59,7 @@ class _PetsScreenState extends State<PetsScreen> {
             "genderID": 28,
             "genderName": "Male"
           },
-          "photo_url":"https://apivet.strategtic.com/storage/mascotas/img_pako-llatas-bances615083.jpeg",
+          "photo_url":"https://cdn0.uncomo.com/es/posts/0/0/3/husky_siberiano_54300_1_600.jpg",
           "createdBy": "1",
           "updatedBy": "1",
           "createdAt": "17-08-2025 02:52:25",
@@ -129,118 +131,157 @@ class _PetsScreenState extends State<PetsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Choose a Pet",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
         elevation: 0,
       ),
       backgroundColor: const Color(0xFFF7F9FC),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: pets.length,
-        itemBuilder: (context, index) {
-          final pet = pets[index];
-          final isSelected = _selectedPet == index; // 🔹 comparación de índice
+      body: Column(
+        children: [
+          // 🔹 Listado de mascotas
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: pets.length,
+              itemBuilder: (context, index) {
+                final pet = pets[index];
+                final isSelected =
+                    _selectedPet == index; // 🔹 comparación de índice
 
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedPet = index; // 🔹 marcamos la selección
-              });
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => PetDetailScreen(
-                    pet: {
-                      "name": pet.name,
-                      "breed": pet.breedName,
-                      "age": pet.age,
-                      "gender": pet.genderName,
-                      "image": pet.photoUrl,
-                      "weight": pet.weight,
-                      "status": pet.healthStatus,
-                    },
-                  ),
-                ),
-              );
-            },
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedPet = index; // 🔹 marcamos la selección
+                    });
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PetDetailScreen(
+                          pet: {
+                            "name": pet.name,
+                            "breed": pet.breedName,
+                            "age": pet.age,
+                            "gender": pet.genderName,
+                            "image": pet.photoUrl,
+                            "weight": pet.weight,
+                            "status": pet.healthStatus,
+                          },
+                        ),
+                      ),
+                    );
+                  },
 
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: isSelected ? AppColors.primary : Colors.grey.shade300,
-                  //color: Colors.grey.shade300,
-                  width: 1,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                color: Colors.white,
-              ),
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                leading: SizedBox(
-                  width: 60, // ancho del contenedor
-                  height: 60, // alto del contenedor
-                  child: CircleAvatar(
-                    backgroundImage: NetworkImage(pet.photoUrl),
-                  ),
-                ),
-                title: Text(
-                  pet.name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "${pet.breedName} • ${pet.age}",
-                      style: const TextStyle(color: Colors.black54),
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: isSelected
+                            ? AppColors.primary
+                            : Colors.grey.shade300,
+                        //color: Colors.grey.shade300,
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      color: Colors.white,
                     ),
-                    Row(
-                      children: [
-                        // Icon(
-                        //   pet["genderIcon"],
-                        //   color: pet["gender"] == "Male"
-                        //       ? Colors.blue
-                        //       : Colors.pink,
-                        //   size: 16,
-                        // ),
-                        Icon(
-                          pet.genderName == "Male" ? Icons.male : Icons.female,
-                          color: pet.genderName == "Male"
-                              ? Colors.blue
-                              : Colors.pink,
-                          size: 16,
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      leading: SizedBox(
+                        width: 60, // ancho del contenedor
+                        height: 60, // alto del contenedor
+                        child: CircleAvatar(
+                          backgroundImage: NetworkImage(pet.photoUrl),
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          pet.genderName,
-                          style: const TextStyle(color: Colors.black54),
+                      ),
+                      title: Text(
+                        pet.name,
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "${pet.breedName} • ${pet.age}",
+                            style: GoogleFonts.poppins(color: Colors.black54),
+                          ),
+                          Row(
+                            children: [
+                              // Icon(
+                              //   pet["genderIcon"],
+                              //   color: pet["gender"] == "Male"
+                              //       ? Colors.blue
+                              //       : Colors.pink,
+                              //   size: 16,
+                              // ),
+                              Icon(
+                                pet.genderName == "Male"
+                                    ? Icons.male
+                                    : Icons.female,
+                                color: pet.genderName == "Male"
+                                    ? Colors.blue
+                                    : Colors.pink,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                pet.genderName,
+                                style: GoogleFonts.poppins(
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      trailing: isSelected
+                          ? const CircleAvatar(
+                              radius: 10,
+                              backgroundColor: AppColors.primary,
+                              child: Icon(
+                                Icons.check,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            )
+                          : null,
                     ),
-                  ],
+                  ),
+                );
+              },
+            ),
+          ),
+          // 🔹 Texto "Add New Pet"
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => AddPetScreen()),
+                );
+              },
+              child: Text(
+                "Add New Pet",
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.primary,
+                  decoration: TextDecoration.underline,
                 ),
-                trailing: isSelected
-                    ? const CircleAvatar(
-                        radius: 10,
-                        backgroundColor: AppColors.primary,
-                        child: Icon(Icons.check, size: 16, color: Colors.white),
-                      )
-                    : null,
               ),
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }

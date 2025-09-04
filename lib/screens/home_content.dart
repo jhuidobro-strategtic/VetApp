@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mobile_vet_app/screens/app_colors.dart';
+import 'package:mobile_vet_app/screens/app_config.dart';
 import 'package:mobile_vet_app/screens/pets_screen.dart';
 
 class HomeContent extends StatelessWidget {

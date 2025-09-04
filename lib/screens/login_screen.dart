@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
-import 'package:mobile_vet_app/screens/app_colors.dart';
+import 'package:mobile_vet_app/screens/app_config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -35,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final url = Uri.parse(
-        "https://apivet.strategtic.com/api/v1/login",
+        "${AppConfig.baseUrl}/api/v1/login",
       ); // 👈 Cambia {{prod}}
       final response = await http.post(
         url,
@@ -47,6 +48,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (response.statusCode == 200 && data["success"] == true) {
         final userName = data["data"]["user"]["name"];
+        final token = data["data"]["access_token"];
+
+        // 👉 Guardar token y baseUrl en SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("token", token);
 
         // 👉 Navegar al HomeContent con el nombre
         Navigator.pushReplacementNamed(context, '/home', arguments: userName);

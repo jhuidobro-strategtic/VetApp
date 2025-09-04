@@ -1,16 +1,16 @@
 class Pet {
   final int petId;
-  final String clinicalRecordCode;
-  final String chipNumber;
+  final String? clinicalRecordCode;
+  final String? chipNumber;
   final String name;
-  final String birthDate;
-  final String weight;
+  final String? birthDate;
+  final String? weight;
   final String age;
   final String? reasonForDeactivation;
   final String? deactivationDate;
-  final String healthStatus;
+  final String? healthStatus;
   final String status;
-  final String photoUrl;
+  final String? photoUrl;
 
   final String clientName;
   final String speciesName;

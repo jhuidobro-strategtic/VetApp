@@ -1,38 +1,59 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'app_colors.dart';
+import 'package:mobile_vet_app/models/maestros.dart';
+import 'package:mobile_vet_app/screens/pets_screen.dart';
+import 'package:mobile_vet_app/services/api_service_maestro.dart';
+import 'package:mobile_vet_app/services/service_pet.dart';
+import 'app_config.dart';
 
 class AddPetScreen extends StatefulWidget {
-  const AddPetScreen({super.key});
+  const AddPetScreen({Key? key}) : super(key: key);
 
   @override
   State<AddPetScreen> createState() => _AddPetScreenState();
 }
 
 class _AddPetScreenState extends State<AddPetScreen> {
+  final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _birthDateController =
-      TextEditingController(); // <- ESTE
-  String? selectedSpecies;
-  String? selectedGender;
+  final TextEditingController _weightController = TextEditingController();
+  final TextEditingController _birthDateController = TextEditingController();
+  //String? selectedSpecies;
+  //String? selectedGender;
+  //String? selectedBreed;
+
+  File? _imageFile;
+  bool _isLoading = false;
+
   DateTime? selectedDate;
   File? _image;
 
-  final List<String> speciesOptions = ["Dog", "Cat", "Bird"];
-  final List<String> genderOptions = ["Male", "Female"];
+  MaestroTipo? _selectedTipo;
+  MaestroTipo? _selectedGender;
+  MaestroTipo? _selectedBreed;
+
+  List<MaestroTipo> _tipos = [];
+  List<MaestroTipo> _genderOptions = [];
+  List<MaestroTipo> _breedOptions = [];
+  bool _loadingTipos = true;
+
+  //final List<String> speciesOptions = ["Dog", "Cat", "Bird"];
+  //final List<String> genderOptions = ["Male", "Female"];
 
   final ImagePicker _picker = ImagePicker();
 
   Future<void> _pickImage() async {
-    final XFile? pickedFile = await _picker.pickImage(
-      source: ImageSource.gallery,
-    );
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
       setState(() {
-        _image = File(pickedFile.path);
+        _image = File(pickedFile.path); // para mostrar en UI
+        _imageFile = File(pickedFile.path); // para enviar en el POST
       });
     }
   }
@@ -50,14 +71,119 @@ class _AddPetScreenState extends State<AddPetScreen> {
         selectedDate = picked;
       });
     }
+  }
 
-    @override
-    void dispose() {
-      _nameController.dispose();
-      //_typeController.dispose();
-      _birthDateController.dispose(); // <- IMPORTANTE liberar memoria
-      super.dispose();
+  @override
+  void initState() {
+    super.initState();
+    _fetchTipos();
+    _fetchTiposGender();
+    _fetchTiposBreed();
+  }
+
+  Future<void> _fetchTipos() async {
+    try {
+      final apiService = ApiService();
+      final tipos = await apiService.getMaestroTipos(1);
+      setState(() {
+        _tipos = tipos;
+        _loadingTipos = false;
+      });
+    } catch (e) {
+      setState(() => _loadingTipos = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error cargando especies: $e")));
     }
+  }
+
+  Future<void> _fetchTiposGender() async {
+    try {
+      final apiService = ApiService();
+      final genderOptions = await apiService.getMaestroTipos(9);
+      setState(() {
+        _genderOptions = genderOptions;
+        _loadingTipos = false;
+      });
+    } catch (e) {
+      setState(() => _loadingTipos = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error cargando generos: $e")));
+    }
+  }
+
+  Future<void> _fetchTiposBreed() async {
+    try {
+      final apiService = ApiService();
+      final breedOptions = await apiService.getMaestroTipos(2);
+      setState(() {
+        _breedOptions = breedOptions;
+        _loadingTipos = false;
+      });
+    } catch (e) {
+      setState(() => _loadingTipos = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error cargando razas: $e")));
+    }
+  }
+
+  final PetService _petService = PetService();
+
+  Future<void> _registerPet() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final result = await _petService.registerPet(
+        clientID: "2",
+        name: _nameController.text.trim(),
+        specie: _selectedTipo!.id.toString(),
+        breed: _selectedBreed!.id.toString(),
+        gender: _selectedGender!.id.toString(),
+        birthDate: _birthDateController.text.trim(),
+        weight: _weightController.text.trim(),
+        imageFile: _imageFile,
+      );
+
+      final body = jsonDecode(result["body"]);
+
+      if (result["success"] && body["success"] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(body["message"] ?? "Mascota registrada con éxito"),
+          ),
+        );
+
+        Navigator.pop(context, true); // Regresar con éxito
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(body["message"] ?? "Error al registrar la mascota"),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    //_typeController.dispose();
+    _birthDateController.dispose(); // <- IMPORTANTE liberar memoria
+    super.dispose();
   }
 
   Widget _buildFormField({required Widget child}) {
@@ -107,220 +233,366 @@ class _AddPetScreenState extends State<AddPetScreen> {
               ),
             ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 🔹 Nombre
-              _buildFormField(
-                child: TextField(
-                  controller: _nameController,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    prefixIcon: const Icon(Icons.pets, color: Colors.black87),
-                    hintText: "Nombre de la mascota",
-                    labelText: "Nombre",
-                    labelStyle: GoogleFonts.poppins(
-                      color: Colors.black54,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 13,
-                    ),
-                    hintStyle: GoogleFonts.poppins(
-                      color: Colors.black38,
-                      fontWeight: FontWeight.w400,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 10,
-                      horizontal: 10,
+          child: Form(
+            key: _formKey, // 👈 importante
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 🔹 Nombre
+                _buildFormField(
+                  child: TextFormField(
+                    controller: _nameController,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      prefixIcon: const Icon(
+                        Icons.arrow_outward_rounded,
+                        color: AppColors.textInput,
+                      ),
+                      hintText: "Pet Name",
+                      labelText: "Pet Name",
+                      labelStyle: GoogleFonts.poppins(
+                        color: Colors.black54,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                      hintStyle: GoogleFonts.poppins(
+                        color: Colors.black38,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 10,
+                        horizontal: 10,
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              // 🔹 Especie
-              _buildFormField(
-                child: DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    prefixIcon: const Icon(
-                      Icons.category,
-                      color: Colors.black87,
-                    ),
-                    labelText: "Especie",
-                    labelStyle: GoogleFonts.poppins(
-                      color: Colors.black54,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 13,
-                    ),
-                  ),
-                  items: ["Dog", "Cat", "Bird"].map((e) {
-                    return DropdownMenuItem(value: e, child: Text(e));
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedSpecies = value;
-                    });
-                  },
+                // 🔹 Especie
+                _buildFormField(
+                  child: _loadingTipos
+                      ? const Center(
+                          child: CircularProgressIndicator(strokeWidth: 1.0),
+                        )
+                      : DropdownButtonFormField<MaestroTipo>(
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            prefixIcon: const Icon(
+                              Icons.category,
+                              color: AppColors.textInput,
+                            ),
+                            labelText: "Specie",
+                            labelStyle: GoogleFonts.poppins(
+                              color: Colors.black54,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 13,
+                            ),
+                          ),
+                          items: _tipos
+                              .map(
+                                (tipo) => DropdownMenuItem<MaestroTipo>(
+                                  value: tipo,
+                                  child: Text(
+                                    tipo.nombre,
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.black87,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedTipo = value;
+                            });
+                          },
+                        ),
                 ),
-              ),
+                //Breed
+                _buildFormField(
+                  child: _loadingTipos
+                      ? const Center(
+                          child: CircularProgressIndicator(strokeWidth: 1.0),
+                        )
+                      : DropdownButtonFormField<MaestroTipo>(
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            prefixIcon: const Icon(
+                              Icons.pets,
+                              color: AppColors.textInput,
+                            ),
+                            labelText: "Breed",
+                            labelStyle: GoogleFonts.poppins(
+                              color: Colors.black54,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 13,
+                            ),
+                          ),
+                          items: _breedOptions
+                              .map(
+                                (tipo) => DropdownMenuItem<MaestroTipo>(
+                                  value: tipo,
+                                  child: Text(
+                                    tipo.nombre,
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.black87,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedBreed = value;
+                            });
+                          },
+                        ),
+                ),
 
-              // 🔹 Género
-              _buildFormField(
-                child: DropdownButtonFormField<String>(
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    prefixIcon: const Icon(
-                      Icons.transgender_outlined,
-                      color: Colors.black87,
-                    ),
-                    labelText: "Gender",
-                    labelStyle: GoogleFonts.poppins(
-                      color: Colors.black54,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 13,
-                    ),
-                  ),
-                  items: ["Male", "Female"].map((e) {
-                    return DropdownMenuItem(value: e, child: Text(e));
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedGender = value;
-                    });
-                  },
-                ),
-              ),
-              // _buildFormField(
-              //   child: DropdownButtonFormField<String>(
-              //     decoration: InputDecoration(
-              //       border: OutlineInputBorder(
-              //         borderRadius: BorderRadius.circular(12),
-              //         borderSide: BorderSide.none,
-              //       ),
-              //       prefixIcon: const Icon(Icons.transgender),
-              //       filled: true,
-              //       fillColor: Colors.white,
-              //     ),
-              //     hint: const Text("Select Gender"),
-              //     value: selectedGender,
-              //     items: genderOptions.map((gender) {
-              //       return DropdownMenuItem(value: gender, child: Text(gender));
-              //     }).toList(),
-              //     onChanged: (value) {
-              //       setState(() {
-              //         selectedGender = value;
-              //       });
-              //     },
-              //   ),
-              // ),
+                // Especie (Dropdown dinámico)
+                /* _buildFormField(
+                child: _loadingTipos
+                    ? const Center(child: CircularProgressIndicator())
+                    : DropdownButtonFormField<MaestroTipo>(
+                        value: _selectedTipo,
+                        items: _tipos
+                            .map(
+                              (tipo) => DropdownMenuItem<MaestroTipo>(
+                                value: tipo,
+                                child: Text(
+                                  tipo.nombre,
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.black87,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedTipo = value;
+                          });
+                        },
+                        // decoration: _inputDecoration(
+                        //   label: "Especie",
+                        //   icon: Icons.category,
+                        // ),
+                      ),
+              ), */
 
-              // 🔹 Fecha de nacimiento
-              _buildFormField(
-                child: TextField(
-                  controller: _birthDateController,
-                  readOnly: true,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    prefixIcon: const Icon(
-                      Icons.calendar_today,
-                      color: Colors.black87,
-                    ),
-                    labelText: "Fecha de Nacimiento",
-                    labelStyle: GoogleFonts.poppins(
-                      color: Colors.black54,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 13,
-                    ),
-                    hintText: "Selecciona una fecha",
-                    hintStyle: GoogleFonts.poppins(
-                      color: Colors.black38,
-                      fontWeight: FontWeight.w400,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      vertical: 10,
-                      horizontal: 10,
-                    ),
-                  ),
-                  onTap: () async {
-                    final DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime.now(),
-                    );
-                    if (pickedDate != null) {
-                      setState(() {
-                        _birthDateController.text =
-                            "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
-                      });
-                    }
-                  },
+                // 🔹 Género
+                _buildFormField(
+                  child: _loadingTipos
+                      ? const Center(
+                          child: CircularProgressIndicator(strokeWidth: 1.0),
+                        )
+                      : DropdownButtonFormField<MaestroTipo>(
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            prefixIcon: const Icon(
+                              Icons.transgender_outlined,
+                              color: AppColors.textInput,
+                            ),
+                            labelText: "Gender",
+                            labelStyle: GoogleFonts.poppins(
+                              color: Colors.black54,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 13,
+                            ),
+                          ),
+                          items: _genderOptions
+                              .map(
+                                (tipo) => DropdownMenuItem<MaestroTipo>(
+                                  value: tipo,
+                                  child: Text(
+                                    tipo.nombre,
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.black87,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedGender = value;
+                            });
+                          },
+                        ),
                 ),
-                // child: ListTile(
-                //   leading: const Icon(Icons.calendar_today),
-                //   title: Text(
-                //     selectedDate == null
-                //         ? "Select Birth Date"
-                //         : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
-                //     style: GoogleFonts.poppins(),
+                // _buildFormField(
+                //   child: DropdownButtonFormField<String>(
+                //     decoration: InputDecoration(
+                //       border: OutlineInputBorder(
+                //         borderRadius: BorderRadius.circular(12),
+                //         borderSide: BorderSide.none,
+                //       ),
+                //       prefixIcon: const Icon(Icons.transgender),
+                //       filled: true,
+                //       fillColor: Colors.white,
+                //     ),
+                //     hint: const Text("Select Gender"),
+                //     value: selectedGender,
+                //     items: genderOptions.map((gender) {
+                //       return DropdownMenuItem(value: gender, child: Text(gender));
+                //     }).toList(),
+                //     onChanged: (value) {
+                //       setState(() {
+                //         selectedGender = value;
+                //       });
+                //     },
                 //   ),
-                //   onTap: _pickDate,
                 // ),
-              ),
 
-              // 🔹 Subir Foto
-              _buildFormField(
-                child: InkWell(
-                  onTap: _pickImage,
-                  child: Container(
-                    height: 150,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: Colors.grey.shade100,
+                // 🔹 Peso
+                _buildFormField(
+                  child: TextFormField(
+                    controller: _weightController,
+                    keyboardType: TextInputType.numberWithOptions(
+                      decimal: true,
+                    ), // Ensures the numeric keyboard with a decimal point is shown
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d+\.?\d*'),
+                      ), // Allows digits and a single optional decimal point
+                    ],
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      prefixIcon: const Icon(
+                        Icons.line_weight,
+                        color: AppColors.textInput,
+                      ),
+                      hintText: "Weight",
+                      labelText: "Weight",
+                      labelStyle: GoogleFonts.poppins(
+                        color: Colors.black54,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                      hintStyle: GoogleFonts.poppins(
+                        color: Colors.black38,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 10,
+                        horizontal: 10,
+                      ),
                     ),
-                    child: _image == null
-                        ? const Center(child: Text("Tap to upload photo"))
-                        : ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.file(
-                              _image!,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
+                  ),
+                ),
+
+                // 🔹 Fecha de nacimiento
+                _buildFormField(
+                  child: TextField(
+                    controller: _birthDateController,
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      prefixIcon: const Icon(
+                        Icons.calendar_today,
+                        color: AppColors.textInput,
+                      ),
+                      labelText: "Fecha de Nacimiento",
+                      labelStyle: GoogleFonts.poppins(
+                        color: Colors.black54,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                      hintText: "Selecciona una fecha",
+                      hintStyle: GoogleFonts.poppins(
+                        color: Colors.black38,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 10,
+                        horizontal: 10,
+                      ),
+                    ),
+                    onTap: () async {
+                      final DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime.now(),
+                      );
+                      if (pickedDate != null) {
+                        setState(() {
+                          _birthDateController.text =
+                              "${pickedDate.day}/${pickedDate.month}/${pickedDate.year}";
+                        });
+                      }
+                    },
+                  ),
+                  // child: ListTile(
+                  //   leading: const Icon(Icons.calendar_today),
+                  //   title: Text(
+                  //     selectedDate == null
+                  //         ? "Select Birth Date"
+                  //         : "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}",
+                  //     style: GoogleFonts.poppins(),
+                  //   ),
+                  //   onTap: _pickDate,
+                  // ),
+                ),
+
+                // 🔹 Subir Foto
+                _buildFormField(
+                  child: InkWell(
+                    onTap: _pickImage,
+                    child: Container(
+                      height: 150,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.grey.shade100,
+                      ),
+                      child: _image == null
+                          ? const Center(child: Text("Tap to upload photo"))
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.file(
+                                _image!,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // 🔹 Botón Register
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      elevation: 4,
+                    ),
+                    onPressed: _isLoading
+                        ? null
+                        : _registerPet, // 👉 aquí invocas tu método
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : Text(
+                            "REGISTER",
+                            style: GoogleFonts.poppins(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
                             ),
                           ),
                   ),
                 ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // 🔹 Botón Register
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    elevation: 4,
-                  ),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Pet agregado con éxito")),
-                    );
-                  },
-                  child: Text(
-                    "REGISTER",
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

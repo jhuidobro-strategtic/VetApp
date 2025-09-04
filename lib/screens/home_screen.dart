@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:mobile_vet_app/screens/app_colors.dart';
+import 'package:mobile_vet_app/screens/app_config.dart';
 import 'package:mobile_vet_app/screens/home_content.dart';
 import 'profile_screen.dart';
 import 'citas/citas_screen.dart';

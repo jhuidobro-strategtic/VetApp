@@ -22,6 +22,7 @@ class PetService {
     }
 
     final url = Uri.parse("${AppConfig.baseUrl}/api/v1/registerMascota");
+    print("🔹 Consumiento URL: $url"); // Imprimir URL
 
     var request = http.MultipartRequest("POST", url);
 
@@ -47,7 +48,10 @@ class PetService {
     final response = await request.send();
     final responseBody = await response.stream.bytesToString();
 
-    if (response.statusCode == 200) {
+    print("📥 Código de respuesta: ${response.statusCode}");
+    print("📥 Body de respuesta: ${responseBody}");
+
+    if (response.statusCode == 201) {
       return {"success": true, "body": responseBody};
     } else {
       return {"success": false, "body": responseBody};

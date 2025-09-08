@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_vet_app/models/maestros.dart';
-import 'package:mobile_vet_app/screens/pets_screen.dart';
+import 'package:mobile_vet_app/screens/success_dialog.dart';
 import 'package:mobile_vet_app/services/api_service_maestro.dart';
 import 'package:mobile_vet_app/services/service_pet.dart';
 import 'app_config.dart';
@@ -40,6 +40,13 @@ class _AddPetScreenState extends State<AddPetScreen> {
   List<MaestroTipo> _genderOptions = [];
   List<MaestroTipo> _breedOptions = [];
   bool _loadingTipos = true;
+
+  bool _hasNameError = false;
+  bool _hasWeigthError = false;
+  bool _hasSpecieError = false;
+  bool _hasBreedError = false;
+  bool _hasGenderError = false;
+  bool _hasBirthDateError = false;
 
   //final List<String> speciesOptions = ["Dog", "Cat", "Bird"];
   //final List<String> genderOptions = ["Male", "Female"];
@@ -151,16 +158,25 @@ class _AddPetScreenState extends State<AddPetScreen> {
       );
 
       final body = jsonDecode(result["body"]);
-
-      if (result["success"] && body["success"] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(body["message"] ?? "Mascota registrada con éxito"),
-          ),
+      print("body: $body");
+      print("a: $body[success]");
+      print("b: $result[success]");
+      if (result["success"]) {
+        showDialog(
+          context: context,
+          barrierDismissible: false, // evitar cerrar tocando afuera
+          builder: (context) {
+            return SuccessDialog(
+              message: body["message"] ?? "Mascota registrada con éxito",
+              onAccept: () {
+                Navigator.pop(context); // cerrar el dialog
+                Navigator.pop(context, true); // regresar a PetsScreen con éxito
+              },
+            );
+          },
         );
-
-        Navigator.pop(context, true); // Regresar con éxito
       } else {
+        print("entra al else");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(body["message"] ?? "Error al registrar la mascota"),
@@ -244,9 +260,23 @@ class _AddPetScreenState extends State<AddPetScreen> {
                     controller: _nameController,
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      prefixIcon: const Icon(
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Colors.red,
+                          width: 1,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Colors.red,
+                          width: 1,
+                        ),
+                      ),
+                      prefixIcon: Icon(
                         Icons.arrow_outward_rounded,
-                        color: AppColors.textInput,
+                        color: _hasNameError ? Colors.red : AppColors.textInput,
                       ),
                       hintText: "Pet Name",
                       labelText: "Pet Name",
@@ -264,6 +294,14 @@ class _AddPetScreenState extends State<AddPetScreen> {
                         horizontal: 10,
                       ),
                     ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        setState(() => _hasNameError = true);
+                        return "Pet name is required";
+                      }
+                      setState(() => _hasNameError = false);
+                      return null;
+                    },
                   ),
                 ),
 
@@ -276,9 +314,18 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       : DropdownButtonFormField<MaestroTipo>(
                           decoration: InputDecoration(
                             border: InputBorder.none,
-                            prefixIcon: const Icon(
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Colors.red,
+                                width: 1,
+                              ),
+                            ),
+                            prefixIcon: Icon(
                               Icons.category,
-                              color: AppColors.textInput,
+                              color: _hasSpecieError
+                                  ? Colors.red
+                                  : AppColors.textInput,
                             ),
                             labelText: "Specie",
                             labelStyle: GoogleFonts.poppins(
@@ -306,6 +353,14 @@ class _AddPetScreenState extends State<AddPetScreen> {
                               _selectedTipo = value;
                             });
                           },
+                          validator: (value) {
+                            if (value == null) {
+                              setState(() => _hasSpecieError = true);
+                              return "Pet specie is required";
+                            }
+                            setState(() => _hasSpecieError = false);
+                            return null;
+                          },
                         ),
                 ),
                 //Breed
@@ -317,9 +372,18 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       : DropdownButtonFormField<MaestroTipo>(
                           decoration: InputDecoration(
                             border: InputBorder.none,
-                            prefixIcon: const Icon(
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Colors.red,
+                                width: 1,
+                              ),
+                            ),
+                            prefixIcon: Icon(
                               Icons.pets,
-                              color: AppColors.textInput,
+                              color: _hasBreedError
+                                  ? Colors.red
+                                  : AppColors.textInput,
                             ),
                             labelText: "Breed",
                             labelStyle: GoogleFonts.poppins(
@@ -346,6 +410,14 @@ class _AddPetScreenState extends State<AddPetScreen> {
                             setState(() {
                               _selectedBreed = value;
                             });
+                          },
+                          validator: (value) {
+                            if (value == null) {
+                              setState(() => _hasBreedError = true);
+                              return "Pet specie is required";
+                            }
+                            setState(() => _hasBreedError = false);
+                            return null;
                           },
                         ),
                 ),
@@ -391,9 +463,18 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       : DropdownButtonFormField<MaestroTipo>(
                           decoration: InputDecoration(
                             border: InputBorder.none,
-                            prefixIcon: const Icon(
+                            errorBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Colors.red,
+                                width: 1,
+                              ),
+                            ),
+                            prefixIcon: Icon(
                               Icons.transgender_outlined,
-                              color: AppColors.textInput,
+                              color: _hasBreedError
+                                  ? Colors.red
+                                  : AppColors.textInput,
                             ),
                             labelText: "Gender",
                             labelStyle: GoogleFonts.poppins(
@@ -420,6 +501,14 @@ class _AddPetScreenState extends State<AddPetScreen> {
                             setState(() {
                               _selectedGender = value;
                             });
+                          },
+                          validator: (value) {
+                            if (value == null) {
+                              setState(() => _hasGenderError = true);
+                              return "Pet gender is required";
+                            }
+                            setState(() => _hasGenderError = false);
+                            return null;
                           },
                         ),
                 ),
@@ -461,9 +550,25 @@ class _AddPetScreenState extends State<AddPetScreen> {
                     ],
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.line_weight,
-                        color: AppColors.textInput,
+                        color: _hasWeigthError
+                            ? Colors.red
+                            : AppColors.textInput,
+                      ),
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Colors.red,
+                          width: 1,
+                        ),
+                      ),
+                      focusedErrorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Colors.red,
+                          width: 1,
+                        ),
                       ),
                       hintText: "Weight",
                       labelText: "Weight",
@@ -481,19 +586,36 @@ class _AddPetScreenState extends State<AddPetScreen> {
                         horizontal: 10,
                       ),
                     ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        setState(() => _hasWeigthError = true);
+                        return "Pet weight is required";
+                      }
+                      setState(() => _hasWeigthError = false);
+                      return null;
+                    },
                   ),
                 ),
 
                 // 🔹 Fecha de nacimiento
                 _buildFormField(
-                  child: TextField(
+                  child: TextFormField(
                     controller: _birthDateController,
                     readOnly: true,
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      prefixIcon: const Icon(
+                      errorBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(
+                          color: Colors.red,
+                          width: 1,
+                        ),
+                      ),
+                      prefixIcon: Icon(
                         Icons.calendar_today,
-                        color: AppColors.textInput,
+                        color: _hasBirthDateError
+                            ? Colors.red
+                            : AppColors.textInput,
                       ),
                       labelText: "Fecha de Nacimiento",
                       labelStyle: GoogleFonts.poppins(
@@ -511,6 +633,14 @@ class _AddPetScreenState extends State<AddPetScreen> {
                         horizontal: 10,
                       ),
                     ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        setState(() => _hasBirthDateError = true);
+                        return "Pet birthday is required";
+                      }
+                      setState(() => _hasBirthDateError = false);
+                      return null;
+                    },
                     onTap: () async {
                       final DateTime? pickedDate = await showDatePicker(
                         context: context,

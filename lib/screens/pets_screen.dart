@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mobile_vet_app/models/pet.dart';
@@ -194,11 +192,15 @@ class _PetsScreenState extends State<PetsScreen> {
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      final result = await Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => AddPetScreen()),
                       );
+
+                      if (result == true) {
+                        _loadPets(); // 👈 refrescas la lista solo si se registró la mascota
+                      }
                     },
                     child: Text(
                       "Add New Pet",

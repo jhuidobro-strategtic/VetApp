@@ -21,12 +21,23 @@ class PetDetailScreen extends StatelessWidget {
                   //bottomLeft: Radius.circular(20),
                   //bottomRight: Radius.circular(20),
                 ),
-                child: Image.network(
-                  pet["image"],
-                  width: double.infinity,
-                  height: 250,
-                  fit: BoxFit.cover,
-                ),
+                // pet.photoUrl != null
+                //                     ? NetworkImage(pet.photoUrl!)
+                //                     : const NetworkImage(
+                //                             "http://apivet.strategtic.com/storage/none.jpg",
+                child: pet["image"] != null
+                    ? Image.network(
+                        pet["image"],
+                        width: double.infinity,
+                        height: 250,
+                        fit: BoxFit.cover,
+                      )
+                    : Image.network(
+                        "http://apivet.strategtic.com/storage/none.jpg",
+                        width: double.infinity,
+                        height: 250,
+                        fit: BoxFit.cover,
+                      ),
               ),
               Positioned(
                 top: 40,

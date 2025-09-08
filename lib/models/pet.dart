@@ -9,7 +9,7 @@ class Pet {
   final String? reasonForDeactivation;
   final String? deactivationDate;
   final String? healthStatus;
-  final String status;
+  final String? status;
   final String? photoUrl;
 
   final String clientName;
